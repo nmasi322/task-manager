@@ -2,6 +2,8 @@ import './task.css'
 import {useState} from 'react'
 import TaskItem from './TaskItem'
 import EditTask from './EditTask'
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import {db} from './firebase'
 
 function Task({id, title, description, completed}) {
 
@@ -14,8 +16,26 @@ function Task({id, title, description, completed}) {
 
    /* function to update document in firestore */
 
-   /* function to delete a document from firstore */ 
+   const handleCheckedChange = async () => {
+    const taskDocRef = doc(db, 'tasks', id)
+    try{
+      await updateDoc(taskDocRef, {
+        completed: checked
+      })
+    } catch (err) {
+      alert(err)
+    }
+  }
 
+   /* function to delete a document from firstore */ 
+   const handleDelete = async () => {
+    const taskDocRef = doc(db, 'tasks', id)
+    try{
+      await deleteDoc(taskDocRef)
+    } catch (err) {
+      alert(err)
+    }
+  }
   return (
     <div className={`task ${checked && 'task--borderColor'}`}>
       <div>
@@ -24,6 +44,7 @@ function Task({id, title, description, completed}) {
           className='checkbox-custom'
           name="checkbox" 
           checked={checked} 
+          onChange={handleCheckedChange}
           type="checkbox" />
         <label 
           htmlFor={`checkbox-${id}`} 
@@ -40,7 +61,7 @@ function Task({id, title, description, completed}) {
               onClick={() => setOpen({...open, edit: true})}>
               Edit
             </button>
-            <button className='task__deleteButton'>Delete</button>
+            <button onClick={handleDelete} className='task__deleteButton'>Delete</button>
           </div>
           <button 
             onClick={() => setOpen({...open, view: true})}>
